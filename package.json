@@ -1,0 +1,86 @@
+{
+  "name": "react-google-contacts",
+  "version": "0.0.1",
+  "description": "A Google Button to import user's gmail contacts",
+  "main": "dist/google-contacts.js",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack/webpack.config.dev.js",
+    "dev": "npm run start",
+    "bundle": "webpack --config webpack/webpack.config.prod.js; git add ./dist/google-contacts.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "clean": "rm -rf node_modules dist; rm yarn.lock"
+  },
+  "pre-commit": [
+    "test",
+    "lint",
+    "bundle"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwent/react-google-contacts.git"
+  },
+  "keywords": [
+    "react",
+    "reactjs",
+    "react-component",
+    "google-contacts",
+    "google-oAuth2",
+    "google-oAuth"
+  ],
+  "author": {
+    "name": "Quentin Rousseau",
+    "email": "contact@quent.in"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kwent/react-google-contacts/issues"
+  },
+  "homepage": "https://github.com/kwent/react-google-contacts",
+  "dependencies": {
+    "@types/react": "*",
+    "prop-types": "^15.6.0",
+    "xml-js": "1.6.11"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.2",
+    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
+    "@babel/plugin-transform-runtime": "7.2.0",
+    "@babel/preset-env": "7.2.3",
+    "@babel/preset-react": "7.0.0",
+    "autoprefixer": "9.4.5",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "23.6.0",
+    "babel-loader": "8.0.5",
+    "babel-plugin-transform-react-constant-elements": "6.23.0",
+    "babel-plugin-transform-react-inline-elements": "6.22.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.4.21",
+    "enzyme": "3.8.0",
+    "enzyme-adapter-react-16": "1.7.1",
+    "eslint-config-ag": "2.0.0",
+    "jest": "23.6.0",
+    "pre-commit": "^1.2.2",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-fontawesome": "1.6.1",
+    "react-hot-loader": "4.6.3",
+    "react-test-renderer": "16.7.0",
+    "uglifyjs-webpack-plugin": "2.1.1",
+    "webpack": "4.28.4",
+    "webpack-cli": "3.2.1",
+    "webpack-dev-server": "3.1.14"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  },
+  "types": "./index.d.ts",
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  }
+}
