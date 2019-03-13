@@ -2,6 +2,8 @@
 
 > A Google Button to import user's gmail contacts
 
+<img src="https://github.com/kwent/react-google-contacts/raw/master/doc/screenshot.png?raw=true" alt="React Google Contacts" style="max-width:100%;" height="200px">
+
 ## Install
 ```
 npm install react-google-contacts
@@ -83,7 +85,6 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 | theme | string | light | If set to `dark` the button will follow the Google brand guidelines for dark. Otherwise it will default to light (https://developers.google.com/identity/branding-guidelines) |
 | icon | boolean | true | Show (`true`) or hide (`false`) the Google Icon |
 | redirectUri       |  string  |  -   | If using ux_mode='redirect', this parameter allows you to override the default redirect_uri that will be used at the end of the consent flow. The default redirect_uri is the current URL stripped of query parameters and hash fragment. |
-Google Scopes List: [scopes](https://developers.google.com/identity/protocols/googlescopes)
 | render       | function | -                                     | Render prop to use a custom element, use renderProps.onClick |
 
 ## onSuccess callback ( w/ offline false)
