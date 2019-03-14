@@ -136,17 +136,23 @@ class GoogleContacts extends Component {
       e.preventDefault() // to prevent submit if used within form
     }
     if (!this.state.disabled) {
+      const _signIn = () => {
+        const auth2 = window.gapi.auth2.getAuthInstance()
+        const options = { prompt }
+        onRequest()
+        if (responseType === 'code') {
+          auth2.grantOfflineAccess(options).then(res => onSuccess(res), err => onFailure(err))
+        } else {
+          auth2.signIn(options).then(res => this.handleImportContacts(res), err => onFailure(err))
+        }
+      }
+
       window.gapi.load('auth2', () => {
-        window.gapi.auth2.init(params).then(() => {
-          const auth2 = window.gapi.auth2.getAuthInstance()
-          const options = { prompt }
-          onRequest()
-          if (responseType === 'code') {
-            auth2.grantOfflineAccess(options).then(res => onSuccess(res), err => onFailure(err))
-          } else {
-            auth2.signIn(options).then(res => this.handleImportContacts(res), err => onFailure(err))
-          }
-        })
+        if (!window.gapi.auth2.getAuthInstance()) {
+          window.gapi.auth2.init(params).then(_signIn)
+        } else {
+          _signIn()
+        }
       })
     }
   }
