@@ -259,7 +259,7 @@ GoogleContacts.defaultProps = {
   tag: 'button',
   buttonText: 'Import from Gmail',
   accessType: 'online',
-  prompt: '',
+  prompt: 'consent',
   cookiePolicy: 'single_host_origin',
   uxMode: 'popup',
   disabled: false,
