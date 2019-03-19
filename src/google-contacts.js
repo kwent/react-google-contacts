@@ -89,14 +89,6 @@ class GoogleContacts extends Component {
     })
 
     onSuccess(results)
-
-    // Logout
-    if (window.gapi) {
-      const auth2 = window.gapi.auth2.getAuthInstance()
-      if (auth2 != null) {
-        auth2.signOut().then(auth2.disconnect().then(this.props.onLogoutSuccess))
-      }
-    }
   }
 
   signIn(e) {

@@ -2,7 +2,7 @@ import React from 'react'
 import GoogleContacts from '../src/index'
 // import FontAwesome from 'react-fontawesome';
 
-const clientId = '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com'
+const clientId = '778160111252-5i4gdthgbvictoi0enhqln31258aufe2.apps.googleusercontent.com'
 
 const success = response => {
   console.log(response) // eslint-disable-line
@@ -14,6 +14,10 @@ const error = response => {
 
 const loading = () => {
   console.log('loading') // eslint-disable-line
+}
+
+const loggedOut = () => {
+  console.log('logged out') // eslint-disable-line
 }
 
 export default () => (
