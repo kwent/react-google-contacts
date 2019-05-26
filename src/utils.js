@@ -28,11 +28,32 @@ function extractTitleFromEntry(entry) {
   return null
 }
 
+function extractGivenNameFromEntry(entry) {
+  if (entry['gd:name'] && entry['gd:name']['gd:givenName'] && entry['gd:name']['gd:givenName']._text {
+    return entry['gd:name']['gd:givenName']._text
+  }
+  return null
+}
+
+function extractFamilyNameFromEntry(entry) {
+  if (entry['gd:name'] && entry['gd:name']['gd:familyName'] && entry['gd:name']['gd:familyName']._text {
+    return entry['gd:name']['gd:familyName']._text
+  }
+  return null
+}
+
 function extractPhoneNumberFromEntry(entry) {
   if (entry['gd:phoneNumber'] && entry['gd:phoneNumber'] && entry['gd:phoneNumber']._attributes && entry['gd:phoneNumber']._attributes.uri) {
     return entry['gd:phoneNumber']._attributes.uri.replace('tel:', '')
   }
 
+  return null
+}
+
+function extractOrganizationFromEntry(entry) {
+  if (entry['gd:organization'] && entry['gd:organization'] && entry['gd:organization']['gd:orgName'] && entry['gd:organization']['gd:orgName']._text) {
+    return entry['gd:organization']['gd:orgName']._text
+  }
   return null
 }
 
