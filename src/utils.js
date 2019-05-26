@@ -29,14 +29,14 @@ function extractTitleFromEntry(entry) {
 }
 
 function extractGivenNameFromEntry(entry) {
-  if (entry['gd:name'] && entry['gd:name']['gd:givenName'] && entry['gd:name']['gd:givenName']._text {
+  if (entry['gd:name'] && entry['gd:name']['gd:givenName'] && entry['gd:name']['gd:givenName']._text) {
     return entry['gd:name']['gd:givenName']._text
   }
   return null
 }
 
 function extractFamilyNameFromEntry(entry) {
-  if (entry['gd:name'] && entry['gd:name']['gd:familyName'] && entry['gd:name']['gd:familyName']._text {
+  if (entry['gd:name'] && entry['gd:name']['gd:familyName'] && entry['gd:name']['gd:familyName']._text) {
     return entry['gd:name']['gd:familyName']._text
   }
   return null
@@ -61,4 +61,4 @@ function extractEmailFromEntry(entry) {
   return entry['gd:email']._attributes.address
 }
 
-export { titleize, extractTitleFromEntry, extractEmailFromEntry, extractPhoneNumberFromEntry }
+export { titleize, extractTitleFromEntry, extractEmailFromEntry, extractPhoneNumberFromEntry, extractGivenNameFromEntry, extractOrganizationFromEntry, extractFamilyNameFromEntry }
