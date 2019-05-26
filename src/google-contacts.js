@@ -8,7 +8,12 @@ import xml from 'xml-js'
 import Icon from './icon'
 import ButtonContent from './button-content'
 
-import { extractTitleFromEntry, extractEmailFromEntry, extractPhoneNumberFromEntry } from './utils'
+import { extractTitleFromEntry,
+extractEmailFromEntry,
+extractPhoneNumberFromEntry,
+extractOrganizationFromEntry,
+extractFamilyNameFromEntry,
+extractGivenNameFromEntry } from './utils'
 
 const SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
 const MAX_RESULTS = '999' // TODO Make this parametable or paginate
@@ -82,8 +87,11 @@ class GoogleContacts extends Component {
       ) {
         results.push({
           title: extractTitleFromEntry(parsed.feed.entry[key]),
+          givenName: extractGivenNameFromEntry(parsed.feed.entry[key]),
+          familyName: extractFamilyNameFromEntry(parsed.feed.entry[key]),
           email: extractEmailFromEntry(parsed.feed.entry[key]),
-          phoneNumber: extractPhoneNumberFromEntry(parsed.feed.entry[key])
+          phoneNumber: extractPhoneNumberFromEntry(parsed.feed.entry[key]),
+          organization: extractOrganizationFromEntry(parsed.feed.entry[key])
         })
       }
     })
