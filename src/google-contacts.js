@@ -11,7 +11,7 @@ import ButtonContent from './button-content'
 import { extractTitleFromEntry, extractEmailFromEntry, extractPhoneNumberFromEntry } from './utils'
 
 const SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
-const MAX_RESULTS = '999' // TODO Make this parametable or paginate
+// const MAX_RESULTS = '999' // TODO Make this parametable or paginate
 
 class GoogleContacts extends Component {
   constructor(props) {
@@ -52,7 +52,7 @@ class GoogleContacts extends Component {
         window.gapi.client
           .request({
             path: '/m8/feeds/contacts/default/full',
-            params: { 'max-results': MAX_RESULTS },
+            params: { 'max-results': this.props.maxResults },
             headers: {
               'GData-Version': '3.0',
               Authorization: `Bearer ${authResponse.access_token}`
@@ -251,7 +251,8 @@ GoogleContacts.propTypes = {
   accessType: PropTypes.string,
   render: PropTypes.func,
   theme: PropTypes.string,
-  icon: PropTypes.bool
+  icon: PropTypes.bool,
+  maxResults: PropTypes.number
 }
 
 GoogleContacts.defaultProps = {
@@ -263,6 +264,7 @@ GoogleContacts.defaultProps = {
   cookiePolicy: 'single_host_origin',
   uxMode: 'popup',
   disabled: false,
+  maxResults: 999,
   disabledStyle: {
     opacity: 0.6
   },

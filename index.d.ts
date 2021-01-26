@@ -73,6 +73,7 @@ export interface GoogleContactsProps {
   readonly disabledStyle?: CSSProperties;
   readonly type?: string;
   readonly accessType?: string;
+  readonly maxResults?: number;
   readonly render?: (props?: { onClick: () => void }) => JSX.Element;
 }
 
