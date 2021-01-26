@@ -65,6 +65,7 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 |:------------:|:--------:|:------------------------------------:|:----------------:|
 |    clientId  |  string  |               REQUIRED               |                  |
 |    jsSrc     |  string  |                   -                  |                  |
+|  maxResults  |  number  |                  999                 |   By passing a number here you can restrict how many results you want to return   |
 | hostedDomain |  string  |                   -                  | URL of the Javascript file normally hosted by Google |
 | responseType |  string  |              permission              | Can be either space-delimited 'id_token', to retrieve an ID Token + 'permission' (or 'token'), to retrieve an Access Token, or 'code', to retrieve an Authorization Code.
 | accessType   |  string  |              online                  | Can be either 'online' or 'offline'. Use offline with responseType 'code' to retrieve a refresh token |
