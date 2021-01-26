@@ -1,6 +1,6 @@
 {
   "name": "react-google-contacts",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A Google Button to import user's gmail contacts",
   "main": "dist/google-contacts.js",
   "scripts": {
