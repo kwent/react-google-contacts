@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Fix extractGivenNameFromEntry & extractFamilyNameFromEntry is not defined
+
 ## 1.0.0
 
 - Update webpack 5.
