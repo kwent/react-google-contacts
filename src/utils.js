@@ -41,13 +41,14 @@ function extractTitleFromEntry(entry) {
 }
 
 function extractPhoneNumberFromEntry(entry) {
-  if (
-    entry["gd:phoneNumber"] &&
-    entry["gd:phoneNumber"] &&
-    entry["gd:phoneNumber"]._attributes &&
-    entry["gd:phoneNumber"]._attributes.uri
-  ) {
-    return entry["gd:phoneNumber"]._attributes.uri.replace("tel:", "");
+  if (entry['gd:phoneNumber']) {
+    if (entry['gd:phoneNumber']._attributes && entry['gd:phoneNumber']._attributes.uri) {
+      return entry['gd:phoneNumber']._attributes.uri.replace('tel:', '')
+    }
+
+    if (entry['gd:phoneNumber']._attributes && entry['gd:phoneNumber']._attributes._text) {
+      return entry['gd:phoneNumber']._attributes._text
+    }
   }
 
   return null;
