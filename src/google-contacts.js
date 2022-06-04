@@ -3,15 +3,11 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import xml from 'xml-js'
 
 import Icon from './icon'
 import ButtonContent from './button-content'
 
-import { extractTitleFromEntry, extractEmailFromEntry, extractPhoneNumberFromEntry } from './utils'
-
-const SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
-// const MAX_RESULTS = '999' // TODO Make this parametable or paginate
+const SCOPE = 'https://www.googleapis.com/auth/contacts.other.readonly'
 
 class GoogleContacts extends Component {
   constructor(props) {
@@ -23,9 +19,11 @@ class GoogleContacts extends Component {
       hovered: false,
       active: false
     }
+    this.allData = []
   }
 
   componentDidMount() {
+    this.allData = []
     const { jsSrc } = this.props
     ;((d, s, id, cb) => {
       const element = d.getElementsByTagName(s)[0]
@@ -43,7 +41,7 @@ class GoogleContacts extends Component {
     })(document, 'script', 'google-contacts')
   }
 
-  handleImportContacts(res) {
+  handleImportContacts(res, pageToken = null) {
     const { onFailure } = this.props
 
     if (res) {
@@ -51,47 +49,59 @@ class GoogleContacts extends Component {
       window.gapi.load('client', () => {
         window.gapi.client
           .request({
-            path: '/m8/feeds/contacts/default/full',
-            params: { 'max-results': this.props.maxResults },
+            path: 'https://people.googleapis.com/v1/otherContacts',
+            params: {
+              readMask: 'names,emailAddresses',
+              pageSize: this.props.maxResults > 1000 ? 1000 : this.props.maxResults,
+              ...(pageToken && { pageToken })
+            },
             headers: {
               'GData-Version': '3.0',
               Authorization: `Bearer ${authResponse.access_token}`
             }
           })
-          .then(response => this.handleParseContacts(response), err => onFailure(err))
+          .then(
+            response => this.handleNextDataFetch(response, res),
+            err => onFailure(err)
+          )
       })
     }
   }
 
-  handleParseContacts(response) {
-    const { onSuccess } = this.props
+  handleNextDataFetch(response, authResponse) {
+    // Parse the response body
+    const parsedData = JSON.parse(response.body)
 
-    // Now let's parse the XML...
-    const options = { ignoreDeclaration: true, ignoreComment: true, compact: true }
-    const parsed = xml.xml2js(response.body, options)
+    // Store the fetched data so that we can use it later
+    this.allData = [...this.allData, ...parsedData.otherContacts]
 
-    // Iterate over each contact.
+    // If we have more data and the number of data we fethced is less than maxResults then fetch again using the nextPageToken
+    if ('nextPageToken' in parsedData && this.props.maxResults < this.allData.length) {
+      this.handleImportContacts(authResponse, parsedData.nextPageToken)
+    } else {
+      this.handleParseContacts()
+    }
+  }
+
+  handleParseContacts() {
+    const { onSuccess, onFailure } = this.props
     const results = []
-
-    Object.keys(parsed.feed.entry).forEach(key => {
-      if (
-        parsed.feed.entry[key] &&
-        parsed.feed.entry[key]['gd:email'] &&
-        parsed.feed.entry[key]['gd:email']._attributes &&
-        parsed.feed.entry[key]['gd:email']._attributes.address
-      ) {
+    try {
+      for (let index = 0; index < this.allData.length; index += 1) {
+        const element = this.allData[index]
         results.push({
-          title: extractTitleFromEntry(parsed.feed.entry[key]),
-          email: extractEmailFromEntry(parsed.feed.entry[key]),
-          phoneNumber: extractPhoneNumberFromEntry(parsed.feed.entry[key])
+          email: element.emailAddresses[0].value,
+          title: 'names' in element ? element.names[0].displayName : element.emailAddresses[0].value
         })
       }
-    })
-
-    onSuccess(results)
+      onSuccess(results)
+    } catch (error) {
+      onFailure('Error to fetch contact')
+    }
   }
 
   signIn(e) {
+    this.allData = []
     const {
       clientId,
       cookiePolicy,
@@ -133,9 +143,15 @@ class GoogleContacts extends Component {
         const options = { prompt }
         onRequest()
         if (responseType === 'code') {
-          auth2.grantOfflineAccess(options).then(res => onSuccess(res), err => onFailure(err))
+          auth2.grantOfflineAccess(options).then(
+            res => onSuccess(res),
+            err => onFailure(err)
+          )
         } else {
-          auth2.signIn(options).then(res => this.handleImportContacts(res), err => onFailure(err))
+          auth2.signIn(options).then(
+            res => this.handleImportContacts(res),
+            err => onFailure(err)
+          )
         }
       }
 

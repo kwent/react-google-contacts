@@ -41,8 +41,7 @@
   "homepage": "https://github.com/kwent/react-google-contacts",
   "dependencies": {
     "@types/react": "*",
-    "prop-types": "^15.6.0",
-    "xml-js": "1.6.11"
+    "prop-types": "^15.6.0"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",
