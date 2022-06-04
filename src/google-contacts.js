@@ -233,7 +233,7 @@ class GoogleContacts extends Component {
       },
       [
         icon && <Icon key={1} active={this.state.active} />,
-        <ButtonContent icon={icon} key={2}>
+        <ButtonContent key={2} icon={icon}>
           {children || buttonText}
         </ButtonContent>
       ]
