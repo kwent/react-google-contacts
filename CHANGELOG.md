@@ -1,3 +1,7 @@
+## 2.0.0
+
+- Contact API deprecation solved and People API implementation added
+
 ## 1.0.1
 
 - Fix extractGivenNameFromEntry & extractFamilyNameFromEntry is not defined
