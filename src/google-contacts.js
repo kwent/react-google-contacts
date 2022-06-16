@@ -1,112 +1,107 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable better-mutation/no-mutating-methods */
 
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import xml from "xml-js";
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
-import Icon from "./icon";
-import ButtonContent from "./button-content";
+import Icon from './icon'
+import ButtonContent from './button-content'
 
-import {
-  extractTitleFromEntry,
-  extractGivenNameFromEntry,
-  extractFamilyNameFromEntry,
-  extractEmailFromEntry,
-  extractPhoneNumberFromEntry,
-} from "./utils";
-
-const SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
-// const MAX_RESULTS = '999' // TODO Make this parametable or paginate
+const SCOPE = 'https://www.googleapis.com/auth/contacts.other.readonly'
 
 class GoogleContacts extends Component {
   constructor(props) {
-    super(props);
-    this.signIn = this.signIn.bind(this);
-    this.handleImportContacts = this.handleImportContacts.bind(this);
-    this.handleParseContacts = this.handleParseContacts.bind(this);
+    super(props)
+    this.signIn = this.signIn.bind(this)
+    this.handleImportContacts = this.handleImportContacts.bind(this)
+    this.handleParseContacts = this.handleParseContacts.bind(this)
     this.state = {
       hovered: false,
-      active: false,
-    };
+      active: false
+    }
+    this.allData = []
   }
 
   componentDidMount() {
-    const { jsSrc } = this.props;
-    ((d, s, id, cb) => {
-      const element = d.getElementsByTagName(s)[0];
-      const fjs = element;
-      let js = element;
-      js = d.createElement(s);
-      js.id = id;
-      js.src = jsSrc;
+    this.allData = []
+    const { jsSrc } = this.props
+    ;((d, s, id, cb) => {
+      const element = d.getElementsByTagName(s)[0]
+      const fjs = element
+      let js = element
+      js = d.createElement(s)
+      js.id = id
+      js.src = jsSrc
       if (fjs && fjs.parentNode) {
-        fjs.parentNode.insertBefore(js, fjs);
+        fjs.parentNode.insertBefore(js, fjs)
       } else {
-        d.head.appendChild(js);
+        d.head.appendChild(js)
       }
-      js.onload = cb;
-    })(document, "script", "google-contacts");
+      js.onload = cb
+    })(document, 'script', 'google-contacts')
   }
 
-  handleImportContacts(res) {
-    const { onFailure } = this.props;
+  handleImportContacts(res, pageToken = null) {
+    const { onFailure } = this.props
 
     if (res) {
-      const authResponse = res.getAuthResponse();
-      window.gapi.load("client", () => {
+      const authResponse = res.getAuthResponse()
+      window.gapi.load('client', () => {
         window.gapi.client
           .request({
-            path: "/m8/feeds/contacts/default/full",
-            params: { "max-results": this.props.maxResults },
-            headers: {
-              "GData-Version": "3.0",
-              Authorization: `Bearer ${authResponse.access_token}`,
+            path: 'https://people.googleapis.com/v1/otherContacts',
+            params: {
+              readMask: 'names,emailAddresses',
+              pageSize: this.props.maxResults > 1000 ? 1000 : this.props.maxResults,
+              ...(pageToken && { pageToken })
             },
+            headers: {
+              'GData-Version': '3.0',
+              Authorization: `Bearer ${authResponse.access_token}`
+            }
           })
           .then(
-            (response) => this.handleParseContacts(response),
-            (err) => onFailure(err)
-          );
-      });
+            response => this.handleNextDataFetch(response, res),
+            err => onFailure(err)
+          )
+      })
     }
   }
 
-  handleParseContacts(response) {
-    const { onSuccess } = this.props;
+  handleNextDataFetch(response, authResponse) {
+    // Parse the response body
+    const parsedData = JSON.parse(response.body)
 
-    // Now let's parse the XML...
-    const options = {
-      ignoreDeclaration: true,
-      ignoreComment: true,
-      compact: true,
-    };
-    const parsed = xml.xml2js(response.body, options);
+    // Store the fetched data so that we can use it later
+    this.allData = [...this.allData, ...parsedData.otherContacts]
 
-    // Iterate over each contact.
-    const results = [];
+    // If we have more data and the number of data we fethced is less than maxResults then fetch again using the nextPageToken
+    if ('nextPageToken' in parsedData && this.props.maxResults < this.allData.length) {
+      this.handleImportContacts(authResponse, parsedData.nextPageToken)
+    } else {
+      this.handleParseContacts()
+    }
+  }
 
-    Object.keys(parsed.feed.entry).forEach((key) => {
-      if (
-        parsed.feed.entry[key] &&
-        parsed.feed.entry[key]["gd:email"] &&
-        parsed.feed.entry[key]["gd:email"]._attributes &&
-        parsed.feed.entry[key]["gd:email"]._attributes.address
-      ) {
+  handleParseContacts() {
+    const { onSuccess, onFailure } = this.props
+    const results = []
+    try {
+      for (let index = 0; index < this.allData.length; index += 1) {
+        const element = this.allData[index]
         results.push({
-          title: extractTitleFromEntry(parsed.feed.entry[key]),
-          givenName: extractGivenNameFromEntry(parsed.feed.entry[key]),
-          familyName: extractFamilyNameFromEntry(parsed.feed.entry[key]),
-          email: extractEmailFromEntry(parsed.feed.entry[key]),
-          phoneNumber: extractPhoneNumberFromEntry(parsed.feed.entry[key]),
-        });
+          email: element.emailAddresses[0].value,
+          title: 'names' in element ? element.names[0].displayName : element.emailAddresses[0].value
+        })
       }
-    });
-
-    onSuccess(results);
+      onSuccess(results)
+    } catch (error) {
+      onFailure('Error to fetch contact')
+    }
   }
 
   signIn(e) {
+    this.allData = []
     const {
       clientId,
       cookiePolicy,
@@ -120,8 +115,8 @@ class GoogleContacts extends Component {
       accessType,
       responseType,
       prompt,
-      onSuccess,
-    } = this.props;
+      onSuccess
+    } = this.props
 
     const params = {
       client_id: clientId,
@@ -132,108 +127,97 @@ class GoogleContacts extends Component {
       ux_mode: uxMode,
       redirect_uri: redirectUri,
       scope: SCOPE,
-      access_type: accessType,
-    };
+      access_type: accessType
+    }
 
-    if (responseType === "code") {
-      params.access_type = "offline";
+    if (responseType === 'code') {
+      params.access_type = 'offline'
     }
 
     if (e) {
-      e.preventDefault(); // to prevent submit if used within form
+      e.preventDefault() // to prevent submit if used within form
     }
     if (!this.state.disabled) {
       const _signIn = () => {
-        const auth2 = window.gapi.auth2.getAuthInstance();
-        const options = { prompt };
-        onRequest();
-        if (responseType === "code") {
-          auth2
-            .grantOfflineAccess(options)
-            .then((res) => onSuccess(res), (err) => onFailure(err));
+        const auth2 = window.gapi.auth2.getAuthInstance()
+        const options = { prompt }
+        onRequest()
+        if (responseType === 'code') {
+          auth2.grantOfflineAccess(options).then(
+            res => onSuccess(res),
+            err => onFailure(err)
+          )
         } else {
-          auth2
-            .signIn(options)
-            .then(
-              (res) => this.handleImportContacts(res),
-              (err) => onFailure(err)
-            );
+          auth2.signIn(options).then(
+            res => this.handleImportContacts(res),
+            err => onFailure(err)
+          )
         }
-      };
+      }
 
-      window.gapi.load("auth2", () => {
+      window.gapi.load('auth2', () => {
         if (!window.gapi.auth2.getAuthInstance()) {
-          window.gapi.auth2.init(params).then(_signIn);
+          window.gapi.auth2.init(params).then(_signIn)
         } else {
-          _signIn();
+          _signIn()
         }
-      });
+      })
     }
   }
 
   render() {
-    const {
-      tag,
-      type,
-      className,
-      disabledStyle,
-      buttonText,
-      children,
-      render,
-      theme,
-      icon,
-    } = this.props;
-    const disabled = this.state.disabled || this.props.disabled;
+    const { tag, type, className, disabledStyle, buttonText, children, render, theme, icon } = this.props
+    const disabled = this.state.disabled || this.props.disabled
 
     if (render) {
-      return render({ onClick: this.signIn });
+      return render({ onClick: this.signIn })
     }
 
     const initialStyle = {
-      backgroundColor: theme === "dark" ? "rgb(66, 133, 244)" : "#fff",
-      display: "inline-flex",
-      alignItems: "center",
-      color: theme === "dark" ? "#fff" : "rgba(0, 0, 0, .54)",
-      boxShadow: "0 2px 2px 0 rgba(0, 0, 0, .24), 0 0 1px 0 rgba(0, 0, 0, .24)",
+      backgroundColor: theme === 'dark' ? 'rgb(66, 133, 244)' : '#fff',
+      display: 'inline-flex',
+      alignItems: 'center',
+      color: theme === 'dark' ? '#fff' : 'rgba(0, 0, 0, .54)',
+      boxShadow: '0 2px 2px 0 rgba(0, 0, 0, .24), 0 0 1px 0 rgba(0, 0, 0, .24)',
       padding: 0,
       borderRadius: 2,
-      border: "1px solid transparent",
+      border: '1px solid transparent',
       fontSize: 14,
-      fontWeight: "500",
-      fontFamily: "Roboto, sans-serif",
-    };
+      fontWeight: '500',
+      fontFamily: 'Roboto, sans-serif'
+    }
 
     const hoveredStyle = {
-      cursor: "pointer",
-      opacity: 0.9,
-    };
+      cursor: 'pointer',
+      opacity: 0.9
+    }
 
     const activeStyle = {
-      cursor: "pointer",
-      backgroundColor: theme === "dark" ? "#3367D6" : "#eee",
-      color: theme === "dark" ? "#fff" : "rgba(0, 0, 0, .54)",
-      opacity: 1,
-    };
+      cursor: 'pointer',
+      backgroundColor: theme === 'dark' ? '#3367D6' : '#eee',
+      color: theme === 'dark' ? '#fff' : 'rgba(0, 0, 0, .54)',
+      opacity: 1
+    }
 
     const defaultStyle = (() => {
       if (disabled) {
-        return Object.assign({}, initialStyle, disabledStyle);
+        return Object.assign({}, initialStyle, disabledStyle)
       }
 
       if (this.state.active) {
-        if (theme === "dark") {
-          return Object.assign({}, initialStyle, activeStyle);
+        if (theme === 'dark') {
+          return Object.assign({}, initialStyle, activeStyle)
         }
 
-        return Object.assign({}, initialStyle, activeStyle);
+        return Object.assign({}, initialStyle, activeStyle)
       }
 
       if (this.state.hovered) {
-        return Object.assign({}, initialStyle, hoveredStyle);
+        return Object.assign({}, initialStyle, hoveredStyle)
       }
 
-      return initialStyle;
-    })();
+      return initialStyle
+    })()
     const googleLoginButton = React.createElement(
       tag,
       {
@@ -245,17 +229,17 @@ class GoogleContacts extends Component {
         style: defaultStyle,
         type,
         disabled,
-        className,
+        className
       },
       [
         icon && <Icon key={1} active={this.state.active} />,
         <ButtonContent key={2} icon={icon}>
           {children || buttonText}
-        </ButtonContent>,
+        </ButtonContent>
       ]
-    );
+    )
 
-    return googleLoginButton;
+    return googleLoginButton
   }
 }
 
@@ -284,26 +268,26 @@ GoogleContacts.propTypes = {
   render: PropTypes.func,
   theme: PropTypes.string,
   icon: PropTypes.bool,
-  maxResults: PropTypes.number,
-};
+  maxResults: PropTypes.number
+}
 
 GoogleContacts.defaultProps = {
-  type: "button",
-  tag: "button",
-  buttonText: "Import from Gmail",
-  accessType: "online",
-  prompt: "consent",
-  cookiePolicy: "single_host_origin",
-  uxMode: "popup",
+  type: 'button',
+  tag: 'button',
+  buttonText: 'Import from Gmail',
+  accessType: 'online',
+  prompt: 'consent',
+  cookiePolicy: 'single_host_origin',
+  uxMode: 'popup',
   disabled: false,
   maxResults: 999,
   disabledStyle: {
-    opacity: 0.6,
+    opacity: 0.6
   },
   icon: true,
-  theme: "light",
+  theme: 'light',
   onRequest: () => {},
-  jsSrc: "https://apis.google.com/js/api.js",
-};
+  jsSrc: 'https://apis.google.com/js/api.js'
+}
 
-export default GoogleContacts;
+export default GoogleContacts

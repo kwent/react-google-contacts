@@ -40,12 +40,8 @@
   },
   "homepage": "https://github.com/kwent/react-google-contacts",
   "dependencies": {
-    "@types/react": "17.0.0",
-    "buffer": "6.0.3",
-    "prop-types": "^15.6.0",
-    "stream": "0.0.2",
-    "terser-webpack-plugin": "5.1.1",
-    "xml-js": "1.6.11"
+    "@types/react": "*",
+    "prop-types": "^15.6.0"
   },
   "devDependencies": {
     "@babel/core": "7.12.10",
