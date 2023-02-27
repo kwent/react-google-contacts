@@ -93,10 +93,6 @@ class GoogleContacts extends Component {
             personFields: 'names,emailAddresses',
             pageSize: maxResults > 1000 ? 1000 : maxResults,
             ...(pageToken && { pageToken })
-          },
-          headers: {
-            'GData-Version': '3.0',
-            Authorization: `Bearer ${tokenResponse.access_token}`
           }
         })
         .then(
