@@ -61,7 +61,7 @@ class GoogleContacts extends Component {
   }
 
   loadClient() {
-    const { clientId, hostedDomain, loginHint, accessType } = this.props
+    const { clientId, hostedDomain, loginHint, accessType, onFailure, redirectUri, uxMode } = this.props
 
     if (accessType === 'online') {
       this.client = window.google.accounts.oauth2.initTokenClient({
@@ -77,9 +77,13 @@ class GoogleContacts extends Component {
         client_id: clientId,
         scope: SCOPE,
         hosted_domain: hostedDomain,
-        hint: loginHint
+        hint: loginHint,
+        redirect_uri: redirectUri,
+        ux_mode: uxMode
       })
     }
+
+    this.client.error_callback = onFailure
   }
 
   handleImportContacts(tokenResponse, pageToken = null) {
@@ -137,7 +141,7 @@ class GoogleContacts extends Component {
   signIn(e) {
     this.allData = []
     const { disable } = this.state
-    const { prompt, onRequest, accessType, onSuccess, onFailure } = this.props
+    const { prompt, onRequest, accessType, onSuccess } = this.props
 
     onRequest()
 
@@ -146,8 +150,6 @@ class GoogleContacts extends Component {
     }
 
     if (!disable) {
-      this.client.error_callback = onFailure
-
       if (accessType === 'online') {
         this.client.callback = resp => {
           this.handleImportContacts(resp)
@@ -261,15 +263,18 @@ GoogleContacts.propTypes = {
   disabledStyle: PropTypes.object,
   hostedDomain: PropTypes.string,
   icon: PropTypes.bool,
+  loginHint: PropTypes.string,
   maxResults: PropTypes.number,
   onFailure: PropTypes.func.isRequired,
   onRequest: PropTypes.func,
   onSuccess: PropTypes.func.isRequired,
   prompt: PropTypes.string,
+  redirectUri: PropTypes.string,
   render: PropTypes.func,
   tag: PropTypes.string,
   theme: PropTypes.string,
-  type: PropTypes.string
+  type: PropTypes.string,
+  uxMode: PropTypes.string
 }
 
 GoogleContacts.defaultProps = {
@@ -285,7 +290,8 @@ GoogleContacts.defaultProps = {
   prompt: 'consent',
   tag: 'button',
   theme: 'light',
-  type: 'button'
+  type: 'button',
+  uxMode: 'popup'
 }
 
 export default GoogleContacts

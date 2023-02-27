@@ -79,8 +79,10 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 |     tag      |  string  |                button                |  sets element tag (div, a, span, etc     |
 |     type     |  string  |               button                 |sets button type (submit || button)     |
 |  disabled    | boolean  |               false                  |                  |
+|   uxMode     |  string  |               popup                  | The UX mode to use for the sign-in flow. Valid values are popup and redirect. |
 |    theme     | string   |               light                  | If set to `dark` the button will follow the Google brand guidelines for dark. Otherwise it will default to light (https://developers.google.com/identity/branding-guidelines) |
 |    icon      | boolean  |               true                   | Show (`true`) or hide (`false`) the Google Icon |
+| redirectUri  |  string  |                 -                    | If using uxMode='redirect', this parameter allows you to override the default redirect_uri that will
 |   render     | function |                 -                    | Render prop to use a custom element, use renderProps.onClick |
 
 ## onSuccess callback ( w/ offline false)
