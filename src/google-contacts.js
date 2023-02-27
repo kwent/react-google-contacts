@@ -24,47 +24,46 @@ class GoogleContacts extends Component {
 
   componentDidMount() {
     this.allData = []
-    const { jsSrc } = this.props
+    const { jsSrcs } = this.props
     ;((d, s, id, cb) => {
       const element = d.getElementsByTagName(s)[0]
       const fjs = element
-      let js = element
-      js = d.createElement(s)
-      js.id = id
-      js.src = jsSrc
-      if (fjs && fjs.parentNode) {
-        fjs.parentNode.insertBefore(js, fjs)
-      } else {
-        d.head.appendChild(js)
-      }
-      js.onload = cb
+      jsSrcs.forEach(jsSrc => {
+        let js = element
+        js = d.createElement(s)
+        js.id = id
+        js.src = jsSrc
+        if (fjs && fjs.parentNode) {
+          fjs.parentNode.insertBefore(js, fjs)
+        } else {
+          d.head.appendChild(js)
+        }
+        js.onload = cb
+      })
     })(document, 'script', 'google-contacts')
   }
 
-  handleImportContacts(res, pageToken = null) {
+  handleImportContacts(tokenResponse, pageToken = null) {
     const { onFailure, maxResults } = this.props
 
-    if (res) {
-      const authResponse = res.getAuthResponse()
-      window.gapi.load('client', () => {
-        window.gapi.client
-          .request({
-            path: 'https://people.googleapis.com/v1/otherContacts',
-            params: {
-              readMask: 'names,emailAddresses',
-              pageSize: maxResults > 1000 ? 1000 : maxResults,
-              ...(pageToken && { pageToken })
-            },
-            headers: {
-              'GData-Version': '3.0',
-              Authorization: `Bearer ${authResponse.access_token}`
-            }
-          })
-          .then(
-            response => this.handleNextDataFetch(response, res),
-            err => onFailure(err)
-          )
-      })
+    if (tokenResponse) {
+      window.gapi.client
+        .request({
+          path: 'https://people.googleapis.com/v1/otherContacts',
+          params: {
+            readMask: 'names,emailAddresses',
+            pageSize: maxResults > 1000 ? 1000 : maxResults,
+            ...(pageToken && { pageToken })
+          },
+          headers: {
+            'GData-Version': '3.0',
+            Authorization: `Bearer ${tokenResponse.access_token}`
+          }
+        })
+        .then(
+          response => this.handleNextDataFetch(response, tokenResponse),
+          err => onFailure(err)
+        )
     }
   }
 
@@ -110,13 +109,13 @@ class GoogleContacts extends Component {
       hostedDomain,
       redirectUri,
       discoveryDocs,
-      onRequest,
-      onFailure,
+      // onRequest,
+      // onFailure,
       uxMode,
       accessType,
-      responseType,
-      prompt,
-      onSuccess
+      responseType
+      // prompt,
+      // onSuccess
     } = this.props
 
     const { disable } = this.state
@@ -141,30 +140,24 @@ class GoogleContacts extends Component {
       e.preventDefault() // to prevent submit if used within form
     }
     if (!disable) {
-      const _signIn = () => {
-        const auth2 = window.gapi.auth2.getAuthInstance()
-        const options = { prompt }
-        onRequest()
+      const _signIn = tokenResponse => {
         if (responseType === 'code') {
-          auth2.grantOfflineAccess(options).then(
-            res => onSuccess(res),
-            err => onFailure(err)
-          )
+          // todo
         } else {
-          auth2.signIn(options).then(
-            res => this.handleImportContacts(res),
-            err => onFailure(err)
-          )
+          this.handleImportContacts(tokenResponse)
         }
       }
 
-      window.gapi.load('auth2', () => {
-        if (!window.gapi.auth2.getAuthInstance()) {
-          window.gapi.auth2.init(params).then(_signIn)
-        } else {
-          _signIn()
-        }
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: params.client_id,
+        scope: params.scope,
+        callback: tokenResponse => {
+          _signIn(tokenResponse)
+        },
+        error_callback: () => {} // handle
       })
+
+      client.requestAccessToken()
     }
   }
 
@@ -259,13 +252,13 @@ GoogleContacts.propTypes = {
   discoveryDocs: PropTypes.array,
   hostedDomain: PropTypes.string,
   icon: PropTypes.bool,
-  jsSrc: PropTypes.string,
+  jsSrcs: PropTypes.array,
   loginHint: PropTypes.string,
   maxResults: PropTypes.number,
   onFailure: PropTypes.func.isRequired,
-  onRequest: PropTypes.func,
+  // onRequest: PropTypes.func,
   onSuccess: PropTypes.func.isRequired,
-  prompt: PropTypes.string,
+  // prompt: PropTypes.string,
   redirectUri: PropTypes.string,
   render: PropTypes.func,
   responseType: PropTypes.string,
@@ -284,10 +277,10 @@ GoogleContacts.defaultProps = {
     opacity: 0.6
   },
   icon: true,
-  jsSrc: 'https://apis.google.com/js/api.js',
+  jsSrcs: ['https://apis.google.com/js/api.js', 'https://accounts.google.com/gsi/client'],
   maxResults: 999,
-  onRequest: () => {},
-  prompt: 'consent',
+  // onRequest: () => {},
+  // prompt: 'consent',
   tag: 'button',
   theme: 'light',
   type: 'button',
