@@ -7,7 +7,7 @@ import PropTypes from 'prop-types'
 import Icon from './icon'
 import ButtonContent from './button-content'
 
-const SCOPE = 'https://www.googleapis.com/auth/contacts.other.readonly'
+const SCOPE = 'https://www.googleapis.com/auth/contacts.readonly'
 
 class GoogleContacts extends Component {
   constructor(props) {
@@ -15,32 +15,59 @@ class GoogleContacts extends Component {
     this.signIn = this.signIn.bind(this)
     this.handleImportContacts = this.handleImportContacts.bind(this)
     this.handleParseContacts = this.handleParseContacts.bind(this)
+    this.loadApi = this.loadApi.bind(this)
+    this.loadClient = this.loadClient.bind(this)
     this.state = {
       hovered: false,
       active: false
     }
     this.allData = []
+    this.tokenClient = null
   }
 
   componentDidMount() {
     this.allData = []
-    const { jsSrcs } = this.props
-    ;((d, s, id, cb) => {
-      const element = d.getElementsByTagName(s)[0]
-      const fjs = element
-      jsSrcs.forEach(jsSrc => {
-        let js = element
-        js = d.createElement(s)
-        js.id = id
-        js.src = jsSrc
-        if (fjs && fjs.parentNode) {
-          fjs.parentNode.insertBefore(js, fjs)
-        } else {
-          d.head.appendChild(js)
-        }
-        js.onload = cb
+    const element = document.getElementsByTagName('script')[0]
+    const firstJs = element
+
+    let js = document.createElement('script')
+    js.id = 'google-contacts'
+    js.src = 'https://apis.google.com/js/api.js'
+    if (firstJs && firstJs.parentNode) {
+      firstJs.parentNode.insertBefore(js, firstJs)
+    } else {
+      document.head.appendChild(js)
+    }
+    js.onload = this.loadApi
+
+    js = document.createElement('script')
+    js.id = 'google-contacts'
+    js.src = 'https://accounts.google.com/gsi/client'
+    if (firstJs && firstJs.parentNode) {
+      firstJs.parentNode.insertBefore(js, firstJs)
+    } else {
+      document.head.appendChild(js)
+    }
+    js.onload = this.loadClient
+  }
+
+  loadApi() {
+    const { apiKey } = this.props
+
+    window.gapi.load('client', () => {
+      window.gapi.client.init({
+        apiKey
       })
-    })(document, 'script', 'google-contacts')
+    })
+  }
+
+  loadClient() {
+    const { clientId } = this.props
+
+    this.tokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPE
+    })
   }
 
   handleImportContacts(tokenResponse, pageToken = null) {
@@ -49,9 +76,9 @@ class GoogleContacts extends Component {
     if (tokenResponse) {
       window.gapi.client
         .request({
-          path: 'https://people.googleapis.com/v1/otherContacts',
+          path: 'https://people.googleapis.com/v1/people/me/connections',
           params: {
-            readMask: 'names,emailAddresses',
+            personFields: 'names,emailAddresses',
             pageSize: maxResults > 1000 ? 1000 : maxResults,
             ...(pageToken && { pageToken })
           },
@@ -71,12 +98,11 @@ class GoogleContacts extends Component {
     const { maxResults } = this.props
     // Parse the response body
     const parsedData = JSON.parse(response.body)
-
     // Store the fetched data so that we can use it later
-    this.allData = [...this.allData, ...parsedData.otherContacts]
-
+    this.allData = [...this.allData, ...parsedData.connections]
     // If we have more data and the number of data we fethced is less than maxResults then fetch again using the nextPageToken
-    if ('nextPageToken' in parsedData && maxResults < this.allData.length) {
+
+    if ('nextPageToken' in parsedData && maxResults > this.allData.length) {
       this.handleImportContacts(authResponse, parsedData.nextPageToken)
     } else {
       this.handleParseContacts()
@@ -101,63 +127,22 @@ class GoogleContacts extends Component {
   }
 
   signIn(e) {
-    this.allData = []
-    const {
-      clientId,
-      cookiePolicy,
-      loginHint,
-      hostedDomain,
-      redirectUri,
-      discoveryDocs,
-      // onRequest,
-      // onFailure,
-      uxMode,
-      accessType,
-      responseType
-      // prompt,
-      // onSuccess
-    } = this.props
-
     const { disable } = this.state
-
-    const params = {
-      client_id: clientId,
-      cookie_policy: cookiePolicy,
-      login_hint: loginHint,
-      hosted_domain: hostedDomain,
-      discoveryDocs,
-      ux_mode: uxMode,
-      redirect_uri: redirectUri,
-      scope: SCOPE,
-      access_type: accessType
-    }
-
-    if (responseType === 'code') {
-      params.access_type = 'offline'
-    }
 
     if (e) {
       e.preventDefault() // to prevent submit if used within form
     }
+
     if (!disable) {
-      const _signIn = tokenResponse => {
-        if (responseType === 'code') {
-          // todo
-        } else {
-          this.handleImportContacts(tokenResponse)
-        }
+      this.tokenClient.callback = async resp => {
+        this.handleImportContacts(resp)
       }
 
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: params.client_id,
-        scope: params.scope,
-        callback: tokenResponse => {
-          _signIn(tokenResponse)
-        },
-        error_callback: () => {} // handle
-      })
-
-      client.requestAccessToken()
+      if (window.gapi.client.getToken() === null) {
+        this.tokenClient.requestAccessToken({ prompt: 'consent' })
+      } else {
+        this.tokenClient.requestAccessToken({ prompt: '' })
+      }
     }
   }
 
@@ -241,50 +226,33 @@ class GoogleContacts extends Component {
 }
 
 GoogleContacts.propTypes = {
-  accessType: PropTypes.string,
   buttonText: PropTypes.node,
   children: PropTypes.node,
   className: PropTypes.string,
   clientId: PropTypes.string.isRequired,
-  cookiePolicy: PropTypes.string,
   disabled: PropTypes.bool,
   disabledStyle: PropTypes.object,
-  discoveryDocs: PropTypes.array,
-  hostedDomain: PropTypes.string,
   icon: PropTypes.bool,
-  jsSrcs: PropTypes.array,
-  loginHint: PropTypes.string,
   maxResults: PropTypes.number,
   onFailure: PropTypes.func.isRequired,
-  // onRequest: PropTypes.func,
   onSuccess: PropTypes.func.isRequired,
-  // prompt: PropTypes.string,
-  redirectUri: PropTypes.string,
   render: PropTypes.func,
-  responseType: PropTypes.string,
   tag: PropTypes.string,
   theme: PropTypes.string,
-  type: PropTypes.string,
-  uxMode: PropTypes.string
+  type: PropTypes.string
 }
 
 GoogleContacts.defaultProps = {
-  accessType: 'online',
   buttonText: 'Import from Gmail',
-  cookiePolicy: 'single_host_origin',
   disabled: false,
   disabledStyle: {
     opacity: 0.6
   },
   icon: true,
-  jsSrcs: ['https://apis.google.com/js/api.js', 'https://accounts.google.com/gsi/client'],
   maxResults: 999,
-  // onRequest: () => {},
-  // prompt: 'consent',
   tag: 'button',
   theme: 'light',
-  type: 'button',
-  uxMode: 'popup'
+  type: 'button'
 }
 
 export default GoogleContacts

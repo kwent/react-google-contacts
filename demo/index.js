@@ -13,7 +13,7 @@ renderApp(App)
 if (module.hot) {
   module.hot.accept('./app.js', () => {
     /* eslint-disable global-require */
-    const app = require('./app.js').default
+    const app = require('./app').default
     renderApp(app)
   })
 }
