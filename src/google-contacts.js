@@ -22,7 +22,7 @@ class GoogleContacts extends Component {
       active: false
     }
     this.allData = []
-    this.tokenClient = null
+    this.client = null
   }
 
   componentDidMount() {
@@ -61,12 +61,25 @@ class GoogleContacts extends Component {
   }
 
   loadClient() {
-    const { clientId } = this.props
+    const { clientId, hostedDomain, loginHint, accessType } = this.props
 
-    this.tokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: SCOPE
-    })
+    if (accessType === 'online') {
+      this.client = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPE,
+        hosted_domain: hostedDomain,
+        hint: loginHint
+      })
+    }
+
+    if (accessType === 'offline') {
+      this.client = window.google.accounts.oauth2.initCodeClient({
+        client_id: clientId,
+        scope: SCOPE,
+        hosted_domain: hostedDomain,
+        hint: loginHint
+      })
+    }
   }
 
   handleImportContacts(tokenResponse, pageToken = null) {
@@ -128,20 +141,37 @@ class GoogleContacts extends Component {
   signIn(e) {
     this.allData = []
     const { disable } = this.state
+    const { prompt, onRequest, accessType, onSuccess, onFailure } = this.props
+
+    onRequest()
 
     if (e) {
       e.preventDefault() // to prevent submit if used within form
     }
 
     if (!disable) {
-      this.tokenClient.callback = async resp => {
-        this.handleImportContacts(resp)
+      this.client.error_callback = onFailure
+
+      if (accessType === 'online') {
+        this.client.callback = resp => {
+          this.handleImportContacts(resp)
+        }
+
+        if (window.gapi.client.getToken() === null) {
+          this.client.requestAccessToken({ prompt })
+        } else {
+          this.client.requestAccessToken({ prompt: '' })
+        }
       }
 
-      if (window.gapi.client.getToken() === null) {
-        this.tokenClient.requestAccessToken({ prompt: 'consent' })
-      } else {
-        this.tokenClient.requestAccessToken({ prompt: '' })
+      if (accessType === 'offline') {
+        this.client.callback = onSuccess
+
+        if (window.gapi.client.getToken() === null) {
+          this.client.requestCode({ prompt })
+        } else {
+          this.client.requestCode({ prompt: '' })
+        }
       }
     }
   }
@@ -226,16 +256,20 @@ class GoogleContacts extends Component {
 }
 
 GoogleContacts.propTypes = {
+  accessType: PropTypes.string,
   buttonText: PropTypes.node,
   children: PropTypes.node,
   className: PropTypes.string,
   clientId: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   disabledStyle: PropTypes.object,
+  hostedDomain: PropTypes.string,
   icon: PropTypes.bool,
   maxResults: PropTypes.number,
   onFailure: PropTypes.func.isRequired,
+  onRequest: PropTypes.func,
   onSuccess: PropTypes.func.isRequired,
+  prompt: PropTypes.string,
   render: PropTypes.func,
   tag: PropTypes.string,
   theme: PropTypes.string,
@@ -243,6 +277,7 @@ GoogleContacts.propTypes = {
 }
 
 GoogleContacts.defaultProps = {
+  accessType: 'online',
   buttonText: 'Import from Gmail',
   disabled: false,
   disabledStyle: {
@@ -250,6 +285,8 @@ GoogleContacts.defaultProps = {
   },
   icon: true,
   maxResults: 999,
+  onRequest: () => {},
+  prompt: 'consent',
   tag: 'button',
   theme: 'light',
   type: 'button'
