@@ -26,7 +26,6 @@ class GoogleContacts extends Component {
   }
 
   componentDidMount() {
-    this.allData = []
     const element = document.getElementsByTagName('script')[0]
     const firstJs = element
 
@@ -127,6 +126,7 @@ class GoogleContacts extends Component {
   }
 
   signIn(e) {
+    this.allData = []
     const { disable } = this.state
 
     if (e) {
