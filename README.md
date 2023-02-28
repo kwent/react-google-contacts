@@ -64,29 +64,26 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 |    params    |   value  |             default value            |   description    |
 |:------------:|:--------:|:------------------------------------:|:----------------:|
 |    clientId  |  string  |               REQUIRED               |                  |
-|    jsSrc     |  string  |                   -                  |                  |
+|    apiKey    |  string  |               REQUIRED               |                  |
 |  maxResults  |  number  |                  999                 |   By passing a number here you can restrict how many results you want to return   |
 | hostedDomain |  string  |                   -                  | URL of the Javascript file normally hosted by Google |
-| responseType |  string  |              permission              | Can be either space-delimited 'id_token', to retrieve an ID Token + 'permission' (or 'token'), to retrieve an Access Token, or 'code', to retrieve an Authorization Code.
-| accessType   |  string  |              online                  | Can be either 'online' or 'offline'. Use offline with responseType 'code' to retrieve a refresh token |
-|   onSuccess  | function |               REQUIRED               |                  |
+|  accessType  |  string  |                 online               | Can be either 'online' or 'offline'. |
 |   onFailure  | function |               REQUIRED               |                  |
-|   onRequest  | function |                   -                  |                  |
+|   onSuccess  | function |               REQUIRED               |                  |
+|   onRequest  | function |                () => {}              |                  |
 |   buttonText |  string  |             Import from Gmail        |                  |
 |   className  |  string  |                   -                  |                  |
-|    style     |  object  |                   -                  |                  |
 | disabledStyle|  object  |                   -                  |                  |
 |   loginHint  |  string  |                   -                  |                  |
-|    prompt    |  string  |                   -                  |                  |
+|    prompt    |  string  |               consent                |                  |
 |     tag      |  string  |                button                |  sets element tag (div, a, span, etc     |
-|     type      |  string  |               button                |sets button type (submit || button)     |
-| disabled | boolean | false                            |                  |
-| discoveryDocs | - | https://developers.google.com/discovery/v1/using |
-| uxMode       |  string  |  popup   | The UX mode to use for the sign-in flow. Valid values are popup and redirect. |
-| theme | string | light | If set to `dark` the button will follow the Google brand guidelines for dark. Otherwise it will default to light (https://developers.google.com/identity/branding-guidelines) |
-| icon | boolean | true | Show (`true`) or hide (`false`) the Google Icon |
-| redirectUri       |  string  |  -   | If using ux_mode='redirect', this parameter allows you to override the default redirect_uri that will be used at the end of the consent flow. The default redirect_uri is the current URL stripped of query parameters and hash fragment. |
-| render       | function | -                                     | Render prop to use a custom element, use renderProps.onClick |
+|     type     |  string  |               button                 |sets button type (submit || button)     |
+|  disabled    | boolean  |               false                  |                  |
+|   uxMode     |  string  |               popup                  | The UX mode to use for the sign-in flow. Valid values are popup and redirect. |
+|    theme     | string   |               light                  | If set to `dark` the button will follow the Google brand guidelines for dark. Otherwise it will default to light (https://developers.google.com/identity/branding-guidelines) |
+|    icon      | boolean  |               true                   | Show (`true`) or hide (`false`) the Google Icon |
+| redirectUri  |  string  |                 -                    | If using uxMode='redirect', this parameter allows you to override the default redirect_uri that will
+|   render     | function |                 -                    | Render prop to use a custom element, use renderProps.onClick |
 
 ## onSuccess callback ( w/ offline false)
 
@@ -96,7 +93,6 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 |:-------------:|:--------:|:------------------------------------:|
 |   title       |  string  |        First Name and Last Name      |
 |   email       |  string  |                Email                 |
-|   phoneNumber |  string  |             Phone Number             |
 
 ## onSuccess callback ( w/ offline true)
 

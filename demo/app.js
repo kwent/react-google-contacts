@@ -2,7 +2,8 @@ import React from 'react'
 import GoogleContacts from '../src/index'
 // import FontAwesome from 'react-fontawesome';
 
-const clientId = '778160111252-5i4gdthgbvictoi0enhqln31258aufe2.apps.googleusercontent.com'
+const clientId = '' // <Your Client Id>
+const apiKey = '' // <Your Api Key>
 
 const success = response => {
   console.log(response) // eslint-disable-line
@@ -16,28 +17,31 @@ const loading = () => {
   console.log('loading') // eslint-disable-line
 }
 
-const loggedOut = () => {
-  console.log('logged out') // eslint-disable-line
-}
-
-export default () => (
+const App = () => (
   <div>
-    <GoogleContacts onRequest={loading} onSuccess={success} onFailure={error} clientId={clientId} />
+    <GoogleContacts apiKey={apiKey} clientId={clientId} onFailure={error} onRequest={loading} onSuccess={success} />
     <br />
     <br />
-    <GoogleContacts theme="dark" onRequest={loading} onSuccess={success} onFailure={error} clientId={clientId} />
+    <GoogleContacts apiKey={apiKey} clientId={clientId} onFailure={error} onRequest={loading} onSuccess={success} theme="dark" />
     <br />
     <br />
-    <GoogleContacts theme="dark" onRequest={loading} onSuccess={success} onFailure={error} clientId={clientId} disabled />
+    <GoogleContacts apiKey={apiKey} clientId={clientId} disabled onFailure={error} onRequest={loading} onSuccess={success} theme="dark" />
     <br />
     <br />
     <GoogleContacts
-      theme="dark"
+      apiKey={apiKey}
+      clientId={clientId}
+      onFailure={error}
       onRequest={loading}
       onSuccess={success}
-      onFailure={error}
-      clientId={clientId}
-      render={renderProps => <button onClick={renderProps.onClick}>This is my custom Google button</button>}
+      render={renderProps => (
+        <button onClick={renderProps.onClick} type="button">
+          This is my custom Google button
+        </button>
+      )}
+      theme="dark"
     />
   </div>
 )
+
+export default App
