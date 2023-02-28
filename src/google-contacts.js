@@ -29,25 +29,29 @@ class GoogleContacts extends Component {
     const element = document.getElementsByTagName('script')[0]
     const firstJs = element
 
-    let js = document.createElement('script')
-    js.id = 'google-contacts'
-    js.src = 'https://apis.google.com/js/api.js'
-    if (firstJs && firstJs.parentNode) {
-      firstJs.parentNode.insertBefore(js, firstJs)
-    } else {
-      document.head.appendChild(js)
+    if (!document.getElementById('google-contacts-api')) {
+      const js = document.createElement('script')
+      js.id = 'google-contacts-api'
+      js.src = 'https://apis.google.com/js/api.js'
+      if (firstJs && firstJs.parentNode) {
+        firstJs.parentNode.insertBefore(js, firstJs)
+      } else {
+        document.head.appendChild(js)
+      }
+      js.onload = this.loadApi
     }
-    js.onload = this.loadApi
 
-    js = document.createElement('script')
-    js.id = 'google-contacts'
-    js.src = 'https://accounts.google.com/gsi/client'
-    if (firstJs && firstJs.parentNode) {
-      firstJs.parentNode.insertBefore(js, firstJs)
-    } else {
-      document.head.appendChild(js)
+    if (!document.getElementById('google-contacts-gsi')) {
+      const js = document.createElement('script')
+      js.id = 'google-contacts-gsi'
+      js.src = 'https://accounts.google.com/gsi/client'
+      if (firstJs && firstJs.parentNode) {
+        firstJs.parentNode.insertBefore(js, firstJs)
+      } else {
+        document.head.appendChild(js)
+      }
+      js.onload = this.loadClient
     }
-    js.onload = this.loadClient
   }
 
   loadApi() {
