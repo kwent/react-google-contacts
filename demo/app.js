@@ -1,6 +1,5 @@
 import React from 'react'
 import GoogleContacts from '../src/index'
-// import FontAwesome from 'react-fontawesome';
 
 const clientId = '' // <Your Client Id>
 const apiKey = '' // <Your Api Key>

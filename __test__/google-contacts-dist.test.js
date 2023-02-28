@@ -12,7 +12,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com'
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
     }
 
     test('render the button', () => {
@@ -41,7 +42,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com',
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
       buttonText
     }
 
@@ -71,7 +73,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com',
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
       className
     }
 
@@ -101,7 +104,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com',
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
       className,
       style
     }
@@ -132,7 +136,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com',
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
       buttonText
     }
 
@@ -162,7 +167,8 @@ describe('Google Contacts Dist', () => {
     const props = {
       onSuccess() {},
       onFailure() {},
-      clientId: '429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com',
+      clientId: 'YOUR_CLIENT_ID',
+      apiKey: 'YOUR_API_KEY',
       tag
     }
 

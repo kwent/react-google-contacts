@@ -21,7 +21,8 @@ const responseCallback = (response) => {
 
 ReactDOM.render(
   <GoogleContacts
-    clientId="429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com"
+    clientId="YOUR_CLIENT_ID"
+    apiKey="YOUR_API_KEY"
     buttonText="Import"
     onSuccess={responseCallback}
     onFailure={responseCallback}
@@ -34,7 +35,8 @@ ReactDOM.render(
 ```js
 ReactDOM.render(
   <GoogleContacts
-    clientId="429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com"
+    clientId="YOUR_CLIENT_ID"
+    apiKey="YOUR_API_KEY"
     render={renderProps => (
       <button onClick={renderProps.onClick}>This is my custom Google button</button>
     )}
@@ -48,9 +50,7 @@ ReactDOM.render(
 
 ## onSuccess callback
 
-If responseType is not 'code', callback will return an array of objects (contacts).
-
-If responseType is 'code', callback will return the offline token for use on your server.
+Callback will return an array of objects (contacts).
 
 If you use the hostedDomain param, make sure to validate the id_token (a JSON web token) returned by Google on your backend server:
  1. In the `responseGoogle(response) {...}` callback function, you should get back a standard JWT located at `response.hg.id_token`
@@ -103,7 +103,8 @@ If you use the hostedDomain param, make sure to validate the id_token (a JSON we
 You can also pass child components such as icons into the button component.
 ```js
   <GoogleContacts
-    clientId={'429632624144-40js6mbas4r3tmjursoco68eoum0a24v.apps.googleusercontent.com'}
+    clientId="YOUR_CLIENT_ID"
+    apiKey="YOUR_API_KEY"
     onSuccess={responseCallback}
     onFailure={responseCallback}
   >
