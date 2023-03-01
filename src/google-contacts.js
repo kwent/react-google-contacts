@@ -131,7 +131,8 @@ class GoogleContacts extends Component {
     try {
       for (let index = 0; index < this.allData.length; index += 1) {
         const element = this.allData[index]
-        if (element.emailAddresses && element.emailAddresses.length > 1) {
+
+        if (element.emailAddresses && element.emailAddresses.length > 0) {
           results.push({
             email: element.emailAddresses[0].value,
             title: 'names' in element ? element.names[0].displayName : element.emailAddresses[0].value
